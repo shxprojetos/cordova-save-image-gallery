@@ -121,7 +121,7 @@ public class SaveImageGallery extends CordovaPlugin {
 
         } else {
             // Save the image
-            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderName);
+            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath);
 
             if (imageFile == null) {
                 callbackContext.error("Error while saving image");
@@ -165,7 +165,7 @@ public class SaveImageGallery extends CordovaPlugin {
             // if (check >= 1) {
             //     folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
             // } else {
-            folder = Environment.getExternalStorageDirectory() + folderPath;
+            folder = new File(Environment.getExternalStorageDirectory() + folderPath);
             // }
 
             boolean success = true;
