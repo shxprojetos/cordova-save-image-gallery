@@ -179,6 +179,12 @@ public class SaveImageGallery extends CordovaPlugin {
                 return retVal;
             } 
 
+            File nomediaFile = new File(folder, ".nomedia");
+
+            if (!nomediaFile.exists()) {
+                nomediaFile.createNewFile();
+            }
+
             // building the filename
             String fileName = prefix + date;
             Bitmap.CompressFormat compressFormat = null;
