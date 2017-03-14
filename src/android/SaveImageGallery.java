@@ -89,6 +89,7 @@ public class SaveImageGallery extends CordovaPlugin {
         boolean mediaScannerEnabled = args.optBoolean(2);
         String format = args.optString(3);
         int quality = args.optInt(4);
+        String folderPath = args.optString(5);
 
         List<String> allowedFormats = Arrays.asList(new String[] { JPG_FORMAT, PNG_FORMAT });
 
@@ -100,6 +101,11 @@ public class SaveImageGallery extends CordovaPlugin {
         // isEmpty() requires API level 9
         if (format.equals(EMPTY_STR) || !allowedFormats.contains(format.toUpperCase())) {
             format = JPG_FORMAT;
+        }
+
+        // isEmpty() requires API level 9
+        if (folderPath.equals(EMPTY_STR)) {
+            folderPath = "/.images/";
         }
 
         if (quality <= 0) {
@@ -114,9 +120,8 @@ public class SaveImageGallery extends CordovaPlugin {
             callbackContext.error("The image could not be decoded");
 
         } else {
-
             // Save the image
-            File imageFile = savePhoto(bmp, filePrefix, format, quality);
+            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderName);
 
             if (imageFile == null) {
                 callbackContext.error("Error while saving image");
@@ -140,7 +145,7 @@ public class SaveImageGallery extends CordovaPlugin {
     /**
      * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
      */
-    private File savePhoto(Bitmap bmp, String prefix, String format, int quality) {
+    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath) {
         File retVal = null;
 
         try {
@@ -149,25 +154,30 @@ public class SaveImageGallery extends CordovaPlugin {
             String date = EMPTY_STR + c.get(Calendar.YEAR) + c.get(Calendar.MONTH) + c.get(Calendar.DAY_OF_MONTH)
                     + c.get(Calendar.HOUR_OF_DAY) + c.get(Calendar.MINUTE) + c.get(Calendar.SECOND);
 
-            int check = deviceVersion.compareTo("2.3.3");
+            //int check = deviceVersion.compareTo("2.3.3");
 
             File folder;
-
             /*
              * File path = Environment.getExternalStoragePublicDirectory(
              * Environment.DIRECTORY_PICTURES ); //this throws error in Android
              * 2.2
              */
-            if (check >= 1) {
-                folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            // if (check >= 1) {
+            //     folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            // } else {
+            folder = Environment.getExternalStorageDirectory() + folderPath;
+            // }
 
-                if (!folder.exists()) {
-                    folder.mkdirs();
-                }
+            boolean success = true;
 
-            } else {
-                folder = Environment.getExternalStorageDirectory();
+            if (!folder.exists()) {
+                success = folder.mkdirs();
             }
+
+            if (success == false) {
+                Log.e("SaveImageToGallery", "Unable to create folder: " + folder.getAbsolutePath());
+                return retVal;
+            } 
 
             // building the filename
             String fileName = prefix + date;
