@@ -1,0 +1,58 @@
+{
+  "name": "cordova-saveb64-image",
+  "version": "1.0.0",
+  "description": "Cordova plugin to save base64 data as a png/jpg image into the device and applying compression if needed",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint www/saveImageGallery.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jesusbaqui/cordova-save-image-gallery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jesusbaqui/cordova-save-image-gallery/issues"
+  },
+  "engines": [
+    {
+      "cordova": ">=3.0.0"
+    },
+    {
+      "node": ">=0.12"
+    }
+  ],
+  "cordova": {
+    "id": "cordova-save-image-gallery",
+    "platforms": [
+      "ios",
+      "android",
+      "wp8"
+    ]
+  },
+  "keywords": [
+    "image",
+    "base64",
+    "save",
+    "png",
+    "jpg",
+    "photo library",
+    "gallery",
+    "ecosystem:cordova",
+    "cordova-ios",
+    "cordova-android",
+    "cordova-wp8"
+  ],
+  "author": "Alejandro Gomez <agommor@gmail.com> (http://github.com/agomezmoron)",
+  "contributors": [
+    "Ignacio Gonzalez <natete981@gmail.com> (http://github.com/agomezmoron)",
+    "StefanoMagrassi <stefano.magrassi@gmail.com> (http://thinkwritedone.com)",
+    "Simba Zhang <solderzzc@gmail.com> (http://www.tiegushi.com)",
+    "Bastian Meier <post@bastianmeier.de> (http://github.com/bastian-meie)",
+    "Daniel Ballesteros <jesusbaqui@gmail.com> (http://github.com/jesusbaqui)"
+  ],
+  "devDependencies": {
+    "eslint": "1.10.3",
+    "nodemsg": "1.0.0"
+  },
+  "homepage": "https://github.com/jesusbaqui/cordova-save-image-gallery#readme"
+}

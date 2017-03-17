@@ -105,7 +105,7 @@ public class SaveImageGallery extends CordovaPlugin {
 
         // isEmpty() requires API level 9
         if (folderPath.equals(EMPTY_STR)) {
-            folderPath = "/.images/";
+            folderPath = "/Pictures/";
         }
 
         if (quality <= 0) {

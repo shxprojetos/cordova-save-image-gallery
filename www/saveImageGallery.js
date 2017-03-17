@@ -171,6 +171,11 @@ function prepareSaveBase64Args(options) {
   }
   args.push(options.quality);
 
+  if (!options.folderPath) {
+    options.folderPath = "/Pictures/";
+  }
+  args.push(options.folderPath);
+
   return args;
 }
 
