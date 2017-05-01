@@ -174,8 +174,10 @@ public class SaveImageGallery extends CordovaPlugin {
             if (success == false) {
                 Log.e("SaveImageToGallery", "Unable to create folder: " + folder.getAbsolutePath());
                 return retVal;
-            } 
-
+            }
+            
+            Log.e("SaveImageToGallery", "folder: " + folder.getAbsolutePath());
+            
             File nomediaFile = new File(folder, ".nomedia");
 
             if (!nomediaFile.exists()) {
