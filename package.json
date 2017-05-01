@@ -1,5 +1,5 @@
 {
-  "name": "cordova-saveb64-image",
+  "name": "shx-cordova-saveb64-image",
   "version": "1.0.0",
   "description": "Cordova plugin to save base64 data as a png/jpg image into the device and applying compression if needed",
   "license": "MIT",
