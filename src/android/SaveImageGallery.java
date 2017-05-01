@@ -90,12 +90,14 @@ public class SaveImageGallery extends CordovaPlugin {
         String format = args.optString(3);
         int quality = args.optInt(4);
         String folderPath = args.optString(5);
+        String paramPath = folderPath;
 
         List<String> allowedFormats = Arrays.asList(new String[] { JPG_FORMAT, PNG_FORMAT });
 
         // isEmpty() requires API level 9
         if (base64.equals(EMPTY_STR)) {
             callbackContext.error("Missing base64 string");
+            return;
         }
 
         // isEmpty() requires API level 9
@@ -121,7 +123,7 @@ public class SaveImageGallery extends CordovaPlugin {
 
         } else {
             // Save the image
-            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath);
+            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath, paramPath);
 
             if (imageFile == null) {
                 callbackContext.error("Error while saving image");
@@ -145,7 +147,7 @@ public class SaveImageGallery extends CordovaPlugin {
     /**
      * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
      */
-    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath) {
+    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath, String paramPath) {
         File retVal = null;
 
         try {
@@ -154,19 +156,14 @@ public class SaveImageGallery extends CordovaPlugin {
             String date = EMPTY_STR + c.get(Calendar.YEAR) + c.get(Calendar.MONTH) + c.get(Calendar.DAY_OF_MONTH)
                     + c.get(Calendar.HOUR_OF_DAY) + c.get(Calendar.MINUTE) + c.get(Calendar.SECOND);
 
-            //int check = deviceVersion.compareTo("2.3.3");
-
             File folder;
-            /*
-             * File path = Environment.getExternalStoragePublicDirectory(
-             * Environment.DIRECTORY_PICTURES ); //this throws error in Android
-             * 2.2
-             */
-            // if (check >= 1) {
-            //     folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            // } else {
-            folder = new File(Environment.getExternalStorageDirectory() + folderPath);
-            // }
+            
+            if( EMPTY_STR.equals( paramPath ) ) {
+               folder = new File(Environment.getExternalStorageDirectory() + folderPath);
+            }
+            else {
+               folder = new File(folderPath);
+            }
 
             boolean success = true;
 
