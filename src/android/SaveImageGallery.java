@@ -162,7 +162,7 @@ public class SaveImageGallery extends CordovaPlugin {
                folder = new File(Environment.getExternalStorageDirectory() + folderPath);
             }
             else {
-               folder = new File(Environment.getDataDirectory() + folderPath);
+               folder = new File(Environment.getDataDirectory() + "/" + folderPath);
             }
 
             boolean success = true;
