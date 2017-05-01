@@ -90,7 +90,6 @@ public class SaveImageGallery extends CordovaPlugin {
         String format = args.optString(3);
         int quality = args.optInt(4);
         String folderPath = args.optString(5);
-        String paramPath = folderPath;
 
         List<String> allowedFormats = Arrays.asList(new String[] { JPG_FORMAT, PNG_FORMAT });
 
@@ -107,7 +106,7 @@ public class SaveImageGallery extends CordovaPlugin {
 
         // isEmpty() requires API level 9
         if (folderPath.equals(EMPTY_STR)) {
-            folderPath = "/Pictures/";
+            //folderPath = "/Pictures/";
         }
 
         if (quality <= 0) {
@@ -123,7 +122,7 @@ public class SaveImageGallery extends CordovaPlugin {
 
         } else {
             // Save the image
-            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath, paramPath);
+            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath);
 
             if (imageFile == null) {
                 callbackContext.error("Error while saving image");
@@ -147,7 +146,7 @@ public class SaveImageGallery extends CordovaPlugin {
     /**
      * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
      */
-    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath, String paramPath) {
+    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath) {
         File retVal = null;
 
         try {
@@ -158,11 +157,11 @@ public class SaveImageGallery extends CordovaPlugin {
 
             File folder;
             
-            if( EMPTY_STR.equals( paramPath ) ) {
-               folder = new File(Environment.getExternalStorageDirectory() + folderPath);
+            if( EMPTY_STR.equals( folderPath ) ) {
+               folder = new File(Environment.getExternalStorageDirectory() + "/Pictures/");
             }
             else {
-               folder = new File(Environment.getDataDirectory() + "");
+               folder = new File(folderPath);
             }
 
             boolean success = true;
