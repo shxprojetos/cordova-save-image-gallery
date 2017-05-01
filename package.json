@@ -1,6 +1,6 @@
 {
   "name": "shx-cordova-saveb64-image",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Cordova plugin to save base64 data as a png/jpg image into the device and applying compression if needed",
   "license": "MIT",
   "scripts": {
@@ -8,10 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jesusbaqui/cordova-save-image-gallery.git"
-  },
-  "bugs": {
-    "url": "https://github.com/jesusbaqui/cordova-save-image-gallery/issues"
+    "url": "git+https://github.com/shxprojetos/cordova-save-image-gallery.git"
   },
   "engines": [
     {
