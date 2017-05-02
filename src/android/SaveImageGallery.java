@@ -184,7 +184,7 @@ public class SaveImageGallery extends CordovaPlugin {
             }
 
             // building the filename
-            String fileName = prefix + date;
+            String fileName = prefix;// + date;
             Bitmap.CompressFormat compressFormat = null;
             // switch for String is not valid for java < 1.6, so we avoid it
             if (format.equalsIgnoreCase(JPG_FORMAT)) {
