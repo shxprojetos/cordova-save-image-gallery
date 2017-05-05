@@ -140,7 +140,7 @@ public class SaveImageGallery extends CordovaPlugin {
       try {
          File folder = createFolder( folderPath );
          if ( folder == null ) {
-            return;
+            return null;
          }
 
          File nomediaFile = new File( folder, ".nomedia" );
