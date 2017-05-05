@@ -84,7 +84,7 @@ public class SaveImageGallery extends CordovaPlugin {
      * It saves a Base64 String into an image.
      */
     private void saveBase64Image(JSONArray args, CallbackContext callbackContext) throws JSONException {
-        String base64 = args.optString(0);
+        byte[] bytes = args.optString(0).getBytes();
         String filePrefix = args.optString(1);
         boolean mediaScannerEnabled = args.optBoolean(2);
         String format = args.optString(3);
@@ -94,7 +94,7 @@ public class SaveImageGallery extends CordovaPlugin {
         List<String> allowedFormats = Arrays.asList(new String[] { JPG_FORMAT, PNG_FORMAT });
 
         // isEmpty() requires API level 9
-        if (base64.equals(EMPTY_STR)) {
+        if (bytes==null) {
             callbackContext.error("Missing base64 string");
             return;
         }
@@ -122,7 +122,7 @@ public class SaveImageGallery extends CordovaPlugin {
 //
 //        } else {
             // Save the image
-            File imageFile = savePhoto(base64, filePrefix, format, quality, folderPath);
+            File imageFile = savePhoto(bytes, filePrefix, format, quality, folderPath);
 
             if (imageFile == null) {
                 callbackContext.error("Error while saving image");
@@ -146,7 +146,7 @@ public class SaveImageGallery extends CordovaPlugin {
     /**
      * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
      */
-    private File savePhoto(String base64, String prefix, String format, int quality, String folderPath) {
+    private File savePhoto(byte[] bytes, String prefix, String format, int quality, String folderPath) {
         File retVal = null;
 
         try {
@@ -202,7 +202,7 @@ public class SaveImageGallery extends CordovaPlugin {
             // now we create the image in the folder
             File imageFile = new File(folder, fileName);
             FileOutputStream out = new FileOutputStream(imageFile);
-            out.write( base64.getBytes() );
+            out.write( bytes );
             out.close();
 
             retVal = imageFile;
