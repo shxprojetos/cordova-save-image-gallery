@@ -113,16 +113,16 @@ public class SaveImageGallery extends CordovaPlugin {
             quality = 100;
         }
 
-        // Create the bitmap from the base64 string
-        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
-        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-
-        if (bmp == null) {
-            callbackContext.error("The image could not be decoded");
-
-        } else {
+//        // Create the bitmap from the base64 string
+//        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
+//        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+//
+//        if (bmp == null) {
+//            callbackContext.error("The image could not be decoded");
+//
+//        } else {
             // Save the image
-            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath);
+            File imageFile = savePhoto(base64, filePrefix, format, quality, folderPath);
 
             if (imageFile == null) {
                 callbackContext.error("Error while saving image");
@@ -140,13 +140,13 @@ public class SaveImageGallery extends CordovaPlugin {
             }
 
             callbackContext.success(path);
-        }
+//        }
     }
 
     /**
      * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
      */
-    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath) {
+    private File savePhoto(String base64, String prefix, String format, int quality, String folderPath) {
         File retVal = null;
 
         try {
@@ -202,9 +202,7 @@ public class SaveImageGallery extends CordovaPlugin {
             // now we create the image in the folder
             File imageFile = new File(folder, fileName);
             FileOutputStream out = new FileOutputStream(imageFile);
-            // compress it
-            bmp.compress(compressFormat, quality, out);
-            out.flush();
+            out.write( base64.getBytes() );
             out.close();
 
             retVal = imageFile;
