@@ -179,7 +179,9 @@ public class SaveImageGallery extends CordovaPlugin {
       FileOutputStream stream = null;
       try {
          stream = new FileOutputStream( imageFile );
+         Log.e( "SaveImageToGallery", "Save file( bytes: " + new String( bytes ) + " )" );
          stream.write( bytes );
+         stream.flush();
       }
       finally {
          if ( stream != null ) {
