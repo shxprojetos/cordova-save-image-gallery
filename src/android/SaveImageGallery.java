@@ -2,6 +2,7 @@ package com.agomezmoron.saveImageGallery;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Arrays;
 import java.util.List;
@@ -113,16 +114,16 @@ public class SaveImageGallery extends CordovaPlugin {
             quality = 100;
         }
 
-        // Create the bitmap from the base64 string
-        byte[] decodedString = base64.getBytes(); // Base64.decode(base64, Base64.DEFAULT);
-        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-
-        if (bmp == null) {
-            callbackContext.error("The image could not be decoded");
-
-        } else {
+//        // Create the bitmap from the base64 string
+//        byte[] decodedString = base64.getBytes(); // Base64.decode(base64, Base64.DEFAULT);
+//        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+//
+//        if (bmp == null) {
+//            callbackContext.error("The image could not be decoded");
+//
+//        } else {
             // Save the image
-            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath);
+            File imageFile = savePhoto(base64.getBytes(), filePrefix, format, quality, folderPath);
 
             if (imageFile == null) {
                 callbackContext.error("Error while saving image");
@@ -140,13 +141,13 @@ public class SaveImageGallery extends CordovaPlugin {
             }
 
             callbackContext.success(path);
-        }
+//        }
     }
 
     /**
      * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
      */
-    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath) {
+    private File savePhoto(byte[] bmp, String prefix, String format, int quality, String folderPath) {
         File retVal = null;
 
         try {
@@ -198,22 +199,40 @@ public class SaveImageGallery extends CordovaPlugin {
                 fileName += ".jpeg";
                 compressFormat = Bitmap.CompressFormat.JPEG;
             }
+            
+//            // now we create the image in the folder
+//            File imageFile = new File(folder, fileName);
+//            FileOutputStream out = new FileOutputStream(imageFile);
+//            // compress it
+////            bmp.compress(compressFormat, quality, out);
+////            out.flush();
+//            out.write( bmp );
+//            out.close();
 
-            // now we create the image in the folder
-            File imageFile = new File(folder, fileName);
-            FileOutputStream out = new FileOutputStream(imageFile);
-            // compress it
-            bmp.compress(compressFormat, quality, out);
-            out.flush();
-            out.close();
-
-            retVal = imageFile;
+            retVal = saveFile( bmp, folder, fileName );
 
         } catch (Exception e) {
             Log.e("SaveImageToGallery", "An exception occured while saving image: " + e.toString());
         }
 
         return retVal;
+    }
+
+    private static void saveFile( byte[] bytes, String folder, String name ) throws IOException {
+       File imageFile = new File( folder, name );
+
+       FileOutputStream stream = null;
+       try {
+          stream = new FileOutputStream( imageFile );
+          stream.write( bytes );
+       }
+       finally {
+          if ( stream != null ) {
+             stream.close();
+          }
+       }
+
+       return imageFile;
     }
 
     /**
