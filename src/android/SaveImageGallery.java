@@ -2,7 +2,6 @@ package com.agomezmoron.saveImageGallery;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Arrays;
 import java.util.List;
@@ -218,7 +217,7 @@ public class SaveImageGallery extends CordovaPlugin {
         return retVal;
     }
 
-    private static void saveFile( byte[] bytes, String folder, String name ) throws IOException {
+    private static File saveFile( byte[] bytes, File folder, String name ) throws Exception {
        File imageFile = new File( folder, name );
 
        FileOutputStream stream = null;
