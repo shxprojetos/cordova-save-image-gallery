@@ -2,6 +2,7 @@ package com.agomezmoron.saveImageGallery;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +19,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.util.Base64;
 import android.util.Log;
 
 /**
@@ -98,6 +98,12 @@ public class SaveImageGallery extends CordovaPlugin {
             callbackContext.error("Missing base64 string");
             return;
         }
+        
+        byte[] bytes = base64.getBytes();
+        if( bytes == null || bytes.length() <= 0 ){
+           callbackContext.error("Missing bytes");
+           return;
+        }
 
         // isEmpty() requires API level 9
         if (format.equals(EMPTY_STR) || !allowedFormats.contains(format.toUpperCase())) {
@@ -113,40 +119,31 @@ public class SaveImageGallery extends CordovaPlugin {
             quality = 100;
         }
 
-        // Create the bitmap from the base64 string
-        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
-        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        // Save the image
+        File imageFile = savePhoto( bytes , filePrefix, format, quality, folderPath );
 
-        if (bmp == null) {
-            callbackContext.error("The image could not be decoded");
-
-        } else {
-            // Save the image
-            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath);
-
-            if (imageFile == null) {
-                callbackContext.error("Error while saving image");
-            }
-
-            // Update image gallery
-            if (mediaScannerEnabled) {
-                scanPhoto(imageFile);
-            }
-
-            String path = imageFile.toString();
-
-            if (!path.startsWith("file://")) {
-                path = "file://" + path;
-            }
-
-            callbackContext.success(path);
+        if (imageFile == null) {
+            callbackContext.error("Error while saving image");
         }
+
+        // Update image gallery
+        if (mediaScannerEnabled) {
+            scanPhoto(imageFile);
+        }
+
+        String path = imageFile.toString();
+
+        if (!path.startsWith("file://")) {
+            path = "file://" + path;
+        }
+
+        callbackContext.success(path);
     }
 
     /**
      * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
      */
-    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath) {
+    private File savePhoto( byte[] bytes, String prefix, String format, int quality, String folderPath ) {
         File retVal = null;
 
         try {
@@ -200,12 +197,17 @@ public class SaveImageGallery extends CordovaPlugin {
             }
 
             // now we create the image in the folder
-            File imageFile = new File(folder, fileName);
-            FileOutputStream out = new FileOutputStream(imageFile);
-            // compress it
-            bmp.compress(compressFormat, quality, out);
-            out.flush();
-            out.close();
+            File imageFile = new File( folder, fileName );
+            FileOutputStream out = null;
+            try {
+               out = new FileOutputStream( imageFile );
+               out.write( bytes );
+            }
+            finally {
+               if ( out != null ) {
+                  out.close();
+               }
+            }
 
             retVal = imageFile;
 
