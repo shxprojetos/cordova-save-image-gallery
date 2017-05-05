@@ -113,21 +113,16 @@ public class SaveImageGallery extends CordovaPlugin {
             quality = 100;
         }
 
-        byte[] bytes = base64.getBytes();
-        if( bytes == null || bytes.length() <= 0 ){
-           callbackContext.error("Missing bytes");
-           return;
-        }
-//        // Create the bitmap from the base64 string
-//        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
-//        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-//
-//        if (bmp == null) {
-//            callbackContext.error("The image could not be decoded");
-//
-//        } else {
+        // Create the bitmap from the base64 string
+        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
+        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+        if (bmp == null) {
+            callbackContext.error("The image could not be decoded");
+
+        } else {
             // Save the image
-            File imageFile = savePhoto(bytes, filePrefix, format, quality, folderPath);
+            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath);
 
             if (imageFile == null) {
                 callbackContext.error("Error while saving image");
@@ -145,13 +140,13 @@ public class SaveImageGallery extends CordovaPlugin {
             }
 
             callbackContext.success(path);
-//        }
+        }
     }
 
     /**
      * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
      */
-    private File savePhoto( byte[] bytes, String prefix, String format, int quality, String folderPath ) {
+    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath) {
         File retVal = null;
 
         try {
@@ -206,16 +201,11 @@ public class SaveImageGallery extends CordovaPlugin {
 
             // now we create the image in the folder
             File imageFile = new File(folder, fileName);
-            FileOutputStream out = null;
-            try {
-               out = new FileOutputStream(imageFile);
-               out.write( bytes );
-            }
-            finally {
-               if ( out != null ) {
-                  out.close();
-               }
-            }
+            FileOutputStream out = new FileOutputStream(imageFile);
+            // compress it
+            bmp.compress(compressFormat, quality, out);
+            out.flush();
+            out.close();
 
             retVal = imageFile;
 
