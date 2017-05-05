@@ -24,226 +24,182 @@ import android.util.Log;
 /**
  * SaveImageGallery.java
  *
- * Extended Android implementation of the Base64ToGallery for iOS.
- * Inspirated by StefanoMagrassi's code
+ * Extended Android implementation of the Base64ToGallery for iOS. Inspirated by StefanoMagrassi's code
  * https://github.com/Nexxa/cordova-base64-to-gallery
  *
  * @author Alejandro Gomez <agommor@gmail.com>
  */
 public class SaveImageGallery extends CordovaPlugin {
 
-    // Consts
-    public static final String EMPTY_STR = "";
+   // Consts
+   public static final String EMPTY_STR = "";
 
-    public static final String JPG_FORMAT = "JPG";
-    public static final String PNG_FORMAT = "PNG";
+   public static final String JPG_FORMAT = "JPG";
+   public static final String PNG_FORMAT = "PNG";
 
-    // actions constants
-    public static final String SAVE_BASE64_ACTION = "saveImageDataToLibrary";
-    public static final String REMOVE_IMAGE_ACTION = "removeImageFromLibrary";
+   // actions constants
+   public static final String SAVE_BASE64_ACTION = "saveImageDataToLibrary";
+   public static final String REMOVE_IMAGE_ACTION = "removeImageFromLibrary";
 
-    @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+   @Override
+   public boolean execute( String action, JSONArray args, CallbackContext callbackContext ) throws JSONException {
+      if ( action.equals( SAVE_BASE64_ACTION ) ) {
+         this.saveBase64Image( args, callbackContext );
+      }
+      else if ( action.equals( REMOVE_IMAGE_ACTION ) ) {
+         this.removeImage( args, callbackContext );
+      }
+      else { // default case: SAVE_BASE64_ACTION
+         this.saveBase64Image( args, callbackContext );
+      }
+      return true;
+   }
 
-        if (action.equals(SAVE_BASE64_ACTION)) {
-            this.saveBase64Image(args, callbackContext);
-        } else if (action.equals(REMOVE_IMAGE_ACTION)) {
-            this.removeImage(args, callbackContext);
-        } else { // default case: SAVE_BASE64_ACTION
-            this.saveBase64Image(args, callbackContext);
-        }
+   /**
+    * It deletes an image from the given path.
+    */
+   private void removeImage( JSONArray args, CallbackContext callbackContext ) throws JSONException {
+      String filename = args.optString( 0 );
 
-        return true;
-    }
+      // isEmpty() requires API level 9
+      if ( filename.equals( EMPTY_STR ) ) {
+         callbackContext.error( "Missing filename string" );
+      }
 
-    /**
-     * It deletes an image from the given path.
-     */
-    private void removeImage(JSONArray args, CallbackContext callbackContext) throws JSONException {
-        String filename = args.optString(0);
+      File file = new File( filename );
+      if ( file.exists() ) {
+         try {
+            file.delete();
+         }
+         catch ( Exception ex ) {
+            callbackContext.error( ex.getMessage() );
+         }
+      }
 
-        // isEmpty() requires API level 9
-        if (filename.equals(EMPTY_STR)) {
-            callbackContext.error("Missing filename string");
-        }
+      callbackContext.success( filename );
 
-        File file = new File(filename);
-        if (file.exists()) {
-            try {
-                file.delete();
-            } catch (Exception ex) {
-                callbackContext.error(ex.getMessage());
-            }
-        }
+   }
 
-        callbackContext.success(filename);
+   /**
+    * It saves a Base64 String into an image.
+    */
+   private void saveBase64Image( JSONArray args, CallbackContext callbackContext ) throws JSONException {
+      String content = args.optString( 0 );
+      String filePrefix = args.optString( 1 );
+      boolean mediaScannerEnabled = args.optBoolean( 2 );
+      String format = args.optString( 3 );
+      int quality = args.optInt( 4 );
+      String folderPath = args.optString( 5 );
 
-    }
+      List<String> allowedFormats = Arrays.asList( new String[] { JPG_FORMAT, PNG_FORMAT } );
 
-    /**
-     * It saves a Base64 String into an image.
-     */
-    private void saveBase64Image(JSONArray args, CallbackContext callbackContext) throws JSONException {
-        String base64 = args.optString(0);
-        String filePrefix = args.optString(1);
-        boolean mediaScannerEnabled = args.optBoolean(2);
-        String format = args.optString(3);
-        int quality = args.optInt(4);
-        String folderPath = args.optString(5);
+      // isEmpty() requires API level 9
+      if ( content.equals( EMPTY_STR ) ) {
+         callbackContext.error( "Missing content string" );
+         return;
+      }
 
-        List<String> allowedFormats = Arrays.asList(new String[] { JPG_FORMAT, PNG_FORMAT });
+      // isEmpty() requires API level 9
+      if ( format.equals( EMPTY_STR ) || !allowedFormats.contains( format.toUpperCase() ) ) {
+         format = JPG_FORMAT;
+      }
 
-        // isEmpty() requires API level 9
-        if (base64.equals(EMPTY_STR)) {
-            callbackContext.error("Missing base64 string");
+      // isEmpty() requires API level 9
+      if ( folderPath.equals( EMPTY_STR ) ) {
+         // folderPath = "/Pictures/";
+      }
+
+      if ( quality <= 0 ) {
+         quality = 100;
+      }
+
+      // Save the image
+      File imageFile = savePhoto( content.getBytes(), filePrefix, format, quality, folderPath );
+
+      if ( imageFile == null ) {
+         callbackContext.error( "Error while saving image" );
+      }
+
+      // Update image gallery
+      if ( mediaScannerEnabled ) {
+         scanPhoto( imageFile );
+      }
+
+      String path = imageFile.toString();
+      if ( !path.startsWith( "file://" ) ) {
+         path = "file://" + path;
+      }
+      callbackContext.success( path );
+   }
+
+   /**
+    * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given
+    * quality.
+    */
+   private File savePhoto( byte[] bytes, String prefix, String format, int quality, String folderPath ) {
+      try {
+         File folder = createFolder( folderPath );
+         if ( folder == null ) {
             return;
-        }
+         }
 
-        // isEmpty() requires API level 9
-        if (format.equals(EMPTY_STR) || !allowedFormats.contains(format.toUpperCase())) {
-            format = JPG_FORMAT;
-        }
+         File nomediaFile = new File( folder, ".nomedia" );
+         if ( !nomediaFile.exists() ) {
+            nomediaFile.createNewFile();
+         }
 
-        // isEmpty() requires API level 9
-        if (folderPath.equals(EMPTY_STR)) {
-            //folderPath = "/Pictures/";
-        }
+         return saveFile( bytes, folder, prefix + ".png" );
+      }
+      catch ( Exception ex ) {
+         Log.e( "SaveImageToGallery", "An exception occured while saving image: " + ex.toString() );
+         return null;
+      }
+   }
 
-        if (quality <= 0) {
-            quality = 100;
-        }
+   private File createFolder( String folderPath ) {
+      File folder;
+      if ( EMPTY_STR.equals( folderPath ) ) {
+         folder = new File( Environment.getExternalStorageDirectory() + "/Pictures/" );
+      }
+      else {
+         folder = new File( folderPath );
+      }
+      if ( !folder.exists() ) {
+         if ( !folder.mkdirs() ) {
+            Log.e( "SaveImageToGallery", "Unable to create folder: " + folder.getAbsolutePath() );
+            return null;
+         }
+      }
+      return folder;
+   }
 
-//        // Create the bitmap from the base64 string
-//        byte[] decodedString = base64.getBytes(); // Base64.decode(base64, Base64.DEFAULT);
-//        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-//
-//        if (bmp == null) {
-//            callbackContext.error("The image could not be decoded");
-//
-//        } else {
-            // Save the image
-            File imageFile = savePhoto(base64.getBytes(), filePrefix, format, quality, folderPath);
+   private File saveFile( byte[] bytes, File folder, String name ) throws Exception {
+      File imageFile = new File( folder, name );
 
-            if (imageFile == null) {
-                callbackContext.error("Error while saving image");
-            }
+      FileOutputStream stream = null;
+      try {
+         stream = new FileOutputStream( imageFile );
+         stream.write( bytes );
+      }
+      finally {
+         if ( stream != null ) {
+            stream.close();
+         }
+      }
 
-            // Update image gallery
-            if (mediaScannerEnabled) {
-                scanPhoto(imageFile);
-            }
+      return imageFile;
+   }
 
-            String path = imageFile.toString();
+   /**
+    * Invoke the system's media scanner to add your photo to the Media Provider's database, making it available in the Android
+    * Gallery application and to other apps.
+    */
+   private void scanPhoto( File imageFile ) {
+      Intent mediaScanIntent = new Intent( Intent.ACTION_MEDIA_SCANNER_SCAN_FILE );
+      Uri contentUri = Uri.fromFile( imageFile );
 
-            if (!path.startsWith("file://")) {
-                path = "file://" + path;
-            }
+      mediaScanIntent.setData( contentUri );
 
-            callbackContext.success(path);
-//        }
-    }
-
-    /**
-     * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
-     */
-    private File savePhoto(byte[] bmp, String prefix, String format, int quality, String folderPath) {
-        File retVal = null;
-
-        try {
-            String deviceVersion = Build.VERSION.RELEASE;
-            Calendar c = Calendar.getInstance();
-            String date = EMPTY_STR + c.get(Calendar.YEAR) + c.get(Calendar.MONTH) + c.get(Calendar.DAY_OF_MONTH)
-                    + c.get(Calendar.HOUR_OF_DAY) + c.get(Calendar.MINUTE) + c.get(Calendar.SECOND);
-
-            File folder;
-            
-            if( EMPTY_STR.equals( folderPath ) ) {
-               folder = new File(Environment.getExternalStorageDirectory() + "/Pictures/");
-            }
-            else {
-               folder = new File(folderPath);
-            }
-
-            boolean success = true;
-
-            if (!folder.exists()) {
-                success = folder.mkdirs();
-            }
-
-            if (success == false) {
-                Log.e("SaveImageToGallery", "Unable to create folder: " + folder.getAbsolutePath());
-                return retVal;
-            }
-            
-            //Log.e("SaveImageToGallery", "folder: " + folder.getAbsolutePath());
-            
-            File nomediaFile = new File(folder, ".nomedia");
-
-            if (!nomediaFile.exists()) {
-                nomediaFile.createNewFile();
-            }
-
-            // building the filename
-            String fileName = prefix;// + date;
-            Bitmap.CompressFormat compressFormat = null;
-            // switch for String is not valid for java < 1.6, so we avoid it
-            if (format.equalsIgnoreCase(JPG_FORMAT)) {
-                fileName += ".jpeg";
-                compressFormat = Bitmap.CompressFormat.JPEG;
-            } else if (format.equalsIgnoreCase(PNG_FORMAT)) {
-                fileName += ".png";
-                compressFormat = Bitmap.CompressFormat.PNG;
-            } else {
-                // default case
-                fileName += ".jpeg";
-                compressFormat = Bitmap.CompressFormat.JPEG;
-            }
-            
-//            // now we create the image in the folder
-//            File imageFile = new File(folder, fileName);
-//            FileOutputStream out = new FileOutputStream(imageFile);
-//            // compress it
-////            bmp.compress(compressFormat, quality, out);
-////            out.flush();
-//            out.write( bmp );
-//            out.close();
-
-            retVal = saveFile( bmp, folder, fileName );
-
-        } catch (Exception e) {
-            Log.e("SaveImageToGallery", "An exception occured while saving image: " + e.toString());
-        }
-
-        return retVal;
-    }
-
-    private static File saveFile( byte[] bytes, File folder, String name ) throws Exception {
-       File imageFile = new File( folder, name );
-
-       FileOutputStream stream = null;
-       try {
-          stream = new FileOutputStream( imageFile );
-          stream.write( bytes );
-       }
-       finally {
-          if ( stream != null ) {
-             stream.close();
-          }
-       }
-
-       return imageFile;
-    }
-
-    /**
-     * Invoke the system's media scanner to add your photo to the Media Provider's database,
-     * making it available in the Android Gallery application and to other apps.
-     */
-    private void scanPhoto(File imageFile) {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri contentUri = Uri.fromFile(imageFile);
-
-        mediaScanIntent.setData(contentUri);
-
-        cordova.getActivity().sendBroadcast(mediaScanIntent);
-    }
+      cordova.getActivity().sendBroadcast( mediaScanIntent );
+   }
 }
