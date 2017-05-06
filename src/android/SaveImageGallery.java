@@ -144,7 +144,7 @@ public class SaveImageGallery extends CordovaPlugin {
 //        }
     }
 
-   private byte[] toByteArray( JSONArray array ) {
+   private byte[] toByteArray( JSONArray array ) throws JSONException {
       byte[] saida = new byte[array.length()];
       for ( int i = 0; i < array.length(); i++ ) {
          saida[i] = (byte) array.getInt( i );
