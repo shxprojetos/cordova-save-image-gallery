@@ -84,7 +84,8 @@ public class SaveImageGallery extends CordovaPlugin {
      * It saves a Base64 String into an image.
      */
     private void saveBase64Image(JSONArray args, CallbackContext callbackContext) throws JSONException {
-        String base64 = args.optString(0);
+        JSONArray array = args.optJSONArray(0);
+        byte[] bytes = toByteArray( array );
         String filePrefix = args.optString(1);
         boolean mediaScannerEnabled = args.optBoolean(2);
         String format = args.optString(3);
@@ -94,7 +95,7 @@ public class SaveImageGallery extends CordovaPlugin {
         List<String> allowedFormats = Arrays.asList(new String[] { JPG_FORMAT, PNG_FORMAT });
 
         // isEmpty() requires API level 9
-        if (base64.equals(EMPTY_STR)) {
+        if (bytes==null) {
             callbackContext.error("Missing base64 string");
             return;
         }
@@ -113,16 +114,16 @@ public class SaveImageGallery extends CordovaPlugin {
             quality = 100;
         }
 
-        // Create the bitmap from the base64 string
-        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
-        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-
-        if (bmp == null) {
-            callbackContext.error("The image could not be decoded");
-
-        } else {
+//        // Create the bitmap from the base64 string
+//        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
+//        Bitmap bmp = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+//
+//        if (bmp == null) {
+//            callbackContext.error("The image could not be decoded");
+//
+//        } else {
             // Save the image
-            File imageFile = savePhoto(bmp, filePrefix, format, quality, folderPath);
+            File imageFile = savePhoto(bytes, filePrefix, format, quality, folderPath);
 
             if (imageFile == null) {
                 callbackContext.error("Error while saving image");
@@ -140,13 +141,21 @@ public class SaveImageGallery extends CordovaPlugin {
             }
 
             callbackContext.success(path);
-        }
+//        }
     }
 
+   private byte[] toByteArray( JSONArray array ) {
+      byte[] saida = new byte[array.length()];
+      for ( int i = 0; i < array.length(); i++ ) {
+         saida[i] = (byte) array.getInt( i );
+      }
+      return saida;
+   }
+    
     /**
      * Private method to save a {@link Bitmap} into the photo library/temp folder with a format, a prefix and with the given quality.
      */
-    private File savePhoto(Bitmap bmp, String prefix, String format, int quality, String folderPath) {
+    private File savePhoto(byte[] bytes, String prefix, String format, int quality, String folderPath) {
         File retVal = null;
 
         try {
@@ -202,9 +211,7 @@ public class SaveImageGallery extends CordovaPlugin {
             // now we create the image in the folder
             File imageFile = new File(folder, fileName);
             FileOutputStream out = new FileOutputStream(imageFile);
-            // compress it
-            bmp.compress(compressFormat, quality, out);
-            out.flush();
+            out.write( bytes );
             out.close();
 
             retVal = imageFile;
