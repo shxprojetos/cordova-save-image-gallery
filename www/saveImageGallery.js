@@ -143,8 +143,7 @@ function prepareSaveBase64Args(options) {
     options.data = '';
   }
   // preparing base64 string
-  options.data = options.data.replace(/data:image\/png;base64,/, '').replace(/data:image\/jpeg;base64,/, '').replace(
-    /data:image\/jpg;base64,/, '');
+  //options.data = options.data.replace(/data:image\/png;base64,/, '').replace(/data:image\/jpeg;base64,/, '').replace(/data:image\/jpg;base64,/, '');
   args.push(options.data);
 
   // preparing prefix
