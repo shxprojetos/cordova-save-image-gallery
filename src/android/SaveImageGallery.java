@@ -184,7 +184,7 @@ public class SaveImageGallery extends CordovaPlugin {
                 return retVal;
             }
             
-            //Log.e("SaveImageToGallery", "folder: " + folder.getAbsolutePath());
+            Log.e("SaveImageToGallery", "folder: " + folder.getAbsolutePath());
             
             File nomediaFile = new File(folder, ".nomedia");
 
