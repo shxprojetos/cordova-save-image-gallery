@@ -44,7 +44,9 @@ public class SaveImageGallery extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-
+       
+       Log.e("SaveImageToGallery", "execute");
+       
         if (action.equals(SAVE_BASE64_ACTION)) {
             this.saveBase64Image(args, callbackContext);
         } else if (action.equals(REMOVE_IMAGE_ACTION)) {
