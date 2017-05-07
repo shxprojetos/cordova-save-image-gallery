@@ -84,6 +84,9 @@ public class SaveImageGallery extends CordovaPlugin {
      * It saves a Base64 String into an image.
      */
     private void saveBase64Image(JSONArray args, CallbackContext callbackContext) throws JSONException {
+       
+       Log.e("SaveImageToGallery", "args length: " + args.length());
+       
         JSONArray array = args.optJSONArray(0);
         byte[] bytes = toByteArray( array );
         String filePrefix = args.optString(1);
@@ -123,6 +126,8 @@ public class SaveImageGallery extends CordovaPlugin {
 //
 //        } else {
             // Save the image
+           Log.e("SaveImageToGallery", "bytes: " + bytes[0] + ", " + bytes[1] + ", " + bytes[2] );
+        
             File imageFile = savePhoto(bytes, filePrefix, format, quality, folderPath);
 
             if (imageFile == null) {
@@ -139,7 +144,8 @@ public class SaveImageGallery extends CordovaPlugin {
             if (!path.startsWith("file://")) {
                 path = "file://" + path;
             }
-
+            
+            Log.e("SaveImageToGallery", "path: " + path );
             callbackContext.success(path);
 //        }
     }
