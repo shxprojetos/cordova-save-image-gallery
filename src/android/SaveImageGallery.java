@@ -45,8 +45,6 @@ public class SaveImageGallery extends CordovaPlugin {
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
        
-       Log.e("SaveImageToGallery", "execute");
-       
         if (action.equals(SAVE_BASE64_ACTION)) {
             this.saveBase64Image(args, callbackContext);
         } else if (action.equals(REMOVE_IMAGE_ACTION)) {
@@ -87,8 +85,6 @@ public class SaveImageGallery extends CordovaPlugin {
      */
     private void saveBase64Image(JSONArray args, CallbackContext callbackContext) throws JSONException {
        
-       Log.e("SaveImageToGallery", "args length: " + args.length());
-       
         JSONArray array = args.optJSONArray(0);
         byte[] bytes = toByteArray( array );
         String filePrefix = args.optString(1);
@@ -128,7 +124,6 @@ public class SaveImageGallery extends CordovaPlugin {
 //
 //        } else {
             // Save the image
-           Log.e("SaveImageToGallery", "bytes: " + bytes[0] + ", " + bytes[1] + ", " + bytes[2] );
         
             File imageFile = savePhoto(bytes, filePrefix, format, quality, folderPath);
 
@@ -147,7 +142,6 @@ public class SaveImageGallery extends CordovaPlugin {
                 path = "file://" + path;
             }
             
-            Log.e("SaveImageToGallery", "path: " + path );
             callbackContext.success(path);
 //        }
     }
@@ -191,8 +185,6 @@ public class SaveImageGallery extends CordovaPlugin {
                 Log.e("SaveImageToGallery", "Unable to create folder: " + folder.getAbsolutePath());
                 return retVal;
             }
-            
-            Log.e("SaveImageToGallery", "folder: " + folder.getAbsolutePath());
             
             File nomediaFile = new File(folder, ".nomedia");
 
